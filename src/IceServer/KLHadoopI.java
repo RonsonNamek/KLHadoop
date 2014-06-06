@@ -27,6 +27,8 @@ import java.util.logging.Level;
 
 import org.apache.log4j.Logger;
 
+import com.kunlun.bd.read.StatisticRead;
+
 import sms_data.Sms;
 import sms_data.SmsDao;
 import sms_data.SmsSearch;
@@ -52,20 +54,20 @@ public class KLHadoopI extends _KLInterfaceDisp
 	public void
 	klInvoke_async(AMD_KLInterface_klInvoke __cb, String operation, Map<String, String[]> indata, Current __current)
 	{
-		logger.info("Begin klInvoke.");
+		logger.info("Begin klInvoke: " + operation);
 		//定义输出参数
 		Map<String, String[]> outdata = new HashMap<String, String[]>();
 		//返回值
 		long stataus = 0;
 
-		if(operation.charAt(2) == '1')
+		if(operation.charAt(2) == '1')	// 任务类型
 		{
 			//任务管理器
 			KLBDTaskMgPrx klmt = null;
 			try
 	        {
 				klmt = KLBDTaskMgPrxHelper.uncheckedCast(__current.adapter.getCommunicator().propertyToProxy("KLTaskManager.Proxy"));
-				if(klmt != null)
+				if(klmt == null)
 				{
 					// TODO
 					stataus = -1;
@@ -115,7 +117,7 @@ public class KLHadoopI extends _KLInterfaceDisp
 	            }
 	            try
 	            {
-	                klmt.AddTask(vparams, vtaskname, voperatorid, ntasktype);
+	            	stataus = klmt.AddTask(vparams, vtaskname, voperatorid, ntasktype);
 	            }
 	            catch(Ice.LocalException ex)
 	            {
@@ -127,6 +129,7 @@ public class KLHadoopI extends _KLInterfaceDisp
 			{
 		        String vbegindate = null;
 		        String venddate = null;
+		        String voperatorid = null;
 		        Set<Entry<String, String[]>> set = indata.entrySet();
 	    		Iterator<Entry<String, String[]>> iterator = set.iterator();
 	            while (iterator.hasNext())
@@ -141,12 +144,16 @@ public class KLHadoopI extends _KLInterfaceDisp
 	                {
 	                    venddate = mapentry.getValue()[0];               
 	                }
+	                else if(keyname.equals("voperatorid"))
+	                {
+	                	voperatorid = mapentry.getValue()[0];               
+	                }
 	            }
 	            
 	            KLTaskArrHolder tasklist = new KLTaskArrHolder();
 	            try
 	            {
-	                klmt.GetJobList(vbegindate, venddate, tasklist);
+	            	stataus = klmt.GetJobList(vbegindate, venddate, tasklist);
 	            }
 	            catch(Ice.LocalException ex)
 	            {
@@ -154,32 +161,35 @@ public class KLHadoopI extends _KLInterfaceDisp
 	                System.err.println(ex);
 	            }
 	            
-	            int size = tasklist.value.length;	            
-	            String[] taskname = new String[size];
-	            String[] sysdate = new String[size];
-	            String[] type = new String[size];
-	            String[] status = new String[size];
-	            String[] params = new String[size];
-	            String[] operationid = new String[size];
+	            int size = tasklist.value.length;
+	            List<String> taskname_array = new LinkedList<String>();
+		        List<String> sysdate_array = new LinkedList<String>();
+		        List<String> type_array = new LinkedList<String>();
+		        List<String> status_array = new LinkedList<String>();
+		        List<String> params_array = new LinkedList<String>();
+		        List<String> operatorid_array = new LinkedList<String>();
 	            for (int i = 0; i < size; i++)
 	            {
-	            	KLTaskInfo info = tasklist.value[i];
-	            	taskname[i] = info.taskname;
-	            	sysdate[i] = info.sysdate;
-	            	type[i] = Long.toString(info.type);
-	            	status[i] = Long.toString(info.status);
-	            	params[i] = info.para;
-	            	operationid[i] = info.operatorid;
+	            	if (voperatorid.equals(tasklist.value[i].operatorid))
+	            	{
+		            	KLTaskInfo info = tasklist.value[i];
+		            	taskname_array.add(info.taskname);
+		            	sysdate_array.add(info.sysdate);
+		            	type_array.add(Long.toString(info.type));
+		            	status_array.add(Long.toString(info.status));
+		            	params_array.add(info.para);
+		            	operatorid_array.add(info.operatorid);
+	            	}
 	            }
-		        outdata.put("vtaskname", taskname);
-		        outdata.put("vcreatedate", sysdate);
-		        outdata.put("ntasktype", type);
-		        outdata.put("ntaskstatus", status);
-		        outdata.put("vparams", params);
-		        outdata.put("voperationid", params);
+		        outdata.put("vtaskname", taskname_array.toArray(new String[taskname_array.size()]));
+		        outdata.put("vcreatedate", sysdate_array.toArray(new String[sysdate_array.size()]));
+		        outdata.put("ntasktype", type_array.toArray(new String[type_array.size()]));
+		        outdata.put("ntaskstatus", status_array.toArray(new String[status_array.size()]));
+		        outdata.put("vparams", params_array.toArray(new String[params_array.size()]));
+		        outdata.put("voperatorid", operatorid_array.toArray(new String[operatorid_array.size()]));
 			}
 		}
-		else if (operation.charAt(2) == '0')
+		else if (operation.charAt(2) == '0')	// 短信查询
 		{
 			// 查询短信接口
 			List<Sms> smslist = new LinkedList<Sms>();
@@ -230,11 +240,36 @@ public class KLHadoopI extends _KLInterfaceDisp
 	        outdata.put("vsendtime",  vsendtime_array.toArray(new String[vsendtime_array.size()]));
 	        outdata.put("vsmscontent",  vsmscontent_array.toArray(new String[vsmscontent_array.size()]));
 		}
+		else if (operation.charAt(2) == '2')	// 其他
+		{
+			if (operation.equals("112010"))
+			{
+				String ntype = null;
+				String vtaskname = null;
+		        Set<Entry<String, String[]>> set = indata.entrySet();
+	    		Iterator<Entry<String, String[]>> iterator = set.iterator();
+	            while (iterator.hasNext())
+	            {
+	            	Entry<String, String[]> mapentry = iterator.next();
+	            	String keyname = mapentry.getKey();
+	                if(keyname.equals("vtaskname"))
+	                {
+	                	vtaskname = mapentry.getValue()[0];
+	                }
+	                else if(keyname.equals("ntasktype"))
+	                {
+	                	ntype = mapentry.getValue()[0];               
+	                }
+	            }
+				outdata = StatisticRead.readFile(ntype, vtaskname);
+			}
+		}
 
         logger.info("Finish klInvoke.");
         //
         __cb.ice_response(stataus, outdata);
 	}
+	
 
     private String _name;
 
