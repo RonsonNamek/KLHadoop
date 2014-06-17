@@ -11,10 +11,9 @@
 
 module KLTypeModule
 {
-	// 数据类型
 	sequence<bool> BoolSeq;
 	sequence<long> LongSeq;
-	sequence<string> StrSeq;
-	dictionary<string, StrSeq> KLDataMap;
+	sequence<string> StringSeq;
+	dictionary<string, StringSeq> KLDataMap;
 };
 

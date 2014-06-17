@@ -13,7 +13,7 @@
 
 module KLInterfaceModule
 {
-	// DataCenter½Ó¿ÚÀà
+	// DataCenter
 	interface KLInterface
 	{		
 		["amd"] long klInvoke(string operation, KLTypeModule::KLDataMap indata, out KLTypeModule::KLDataMap outdata);

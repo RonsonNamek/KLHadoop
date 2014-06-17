@@ -15,7 +15,9 @@ package IceServer;
 import Ice.Current;
 import KLBD.*;
 import KLInterfaceModule.*;
+import StatisticRun.ReadTaskFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -242,10 +244,16 @@ public class KLHadoopI extends _KLInterfaceDisp
 		}
 		else if (operation.charAt(2) == '2')	// 其他
 		{
-			if (operation.equals("112010"))
+			if (operation.equals("112010") ||		// 词频统计结果查询
+					operation.equals("112011") ||	// 行为特征分析结果查询
+					operation.equals("112013") ||	// 长文本相似度分析结果查询
+					operation.equals("112014") ||	// 群发号码分析结果查询
+					operation.equals("112016"))		// 通信频率分析结果查询
 			{
-				String ntype = null;
+				String ntasktype = null;
 				String vtaskname = null;
+				String vphoneno = null;
+				String ntype = null;
 		        Set<Entry<String, String[]>> set = indata.entrySet();
 	    		Iterator<Entry<String, String[]>> iterator = set.iterator();
 	            while (iterator.hasNext())
@@ -258,10 +266,34 @@ public class KLHadoopI extends _KLInterfaceDisp
 	                }
 	                else if(keyname.equals("ntasktype"))
 	                {
-	                	ntype = mapentry.getValue()[0];               
+	                	ntasktype = mapentry.getValue()[0];               
 	                }
+	                if (operation.equals("112016"))
+	    			{
+	                	ntasktype = mapentry.getValue()[0];  
+	    			}
 	            }
-				outdata = StatisticRead.readFile(ntype, vtaskname);
+	            if (operation.equals("112016"))
+				{
+					outdata = StatisticRead.readCommFrenFile(ntasktype, ntype, vphoneno, vtaskname);
+				}
+	            else
+	            {
+					outdata = StatisticRead.readFile(ntasktype, vtaskname);
+	            }
+			}
+			else if (operation.equals("112012") ||	// 特征值统计结果查询
+					operation.equals("112015"))		// 流量流向分析结果查询
+			{
+				try
+				{
+					outdata = ReadTaskFile.ReadFile(indata);
+				}
+				catch (IOException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 

@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-#ifndef KLBD_ICE
-#define KLBD_ICE
+#pragma once
 
 module KLBD
 {
@@ -44,4 +43,3 @@ module KLBD
 
 };
 
-#endif
