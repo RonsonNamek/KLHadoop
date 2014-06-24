@@ -15,9 +15,15 @@ package IceServer;
 import Ice.Current;
 import KLBD.*;
 import KLInterfaceModule.*;
+import KLInquire.Sms;
+import KLInquire.SmsInquire;
+import KLInquire.SmsSearch;
+import KLInquire.SmsSearchSave;
 import StatisticRun.ReadTaskFile;
 
 import java.io.IOException;
+import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -31,9 +37,6 @@ import org.apache.log4j.Logger;
 
 import com.kunlun.bd.read.StatisticRead;
 
-import sms_data.Sms;
-import sms_data.SmsDao;
-import sms_data.SmsSearch;
 
 
 
@@ -85,7 +88,7 @@ public class KLHadoopI extends _KLInterfaceDisp
 	        }
 			
 			
-			if(operation.equals("111007"))		//创建热点词频分析任务的解析
+			if(operation.equals("111007"))		//创建任务的解析
 			{
 	            String vparams = null;
 	            String voperatorid = null;
@@ -197,7 +200,7 @@ public class KLHadoopI extends _KLInterfaceDisp
 			List<Sms> smslist = new LinkedList<Sms>();
 			if (operation.equals("120003"))	//组合条件查询接口的解析
 			{
-				SmsDao test1 = new SmsDao();
+				SmsInquire test1 = new SmsInquire();
 				try
 				{
 					smslist = test1.getSms(indata);
@@ -248,7 +251,9 @@ public class KLHadoopI extends _KLInterfaceDisp
 					operation.equals("112011") ||	// 行为特征分析结果查询
 					operation.equals("112013") ||	// 长文本相似度分析结果查询
 					operation.equals("112014") ||	// 群发号码分析结果查询
-					operation.equals("112016"))		// 通信频率分析结果查询
+					operation.equals("112016") ||	// 通信频率分析结果查询
+					operation.equals("112017") ||	// 溯源分析结果查询
+					operation.equals("112018"))		// 亲密度分析结果查询
 			{
 				String ntasktype = null;
 				String vtaskname = null;
@@ -268,9 +273,16 @@ public class KLHadoopI extends _KLInterfaceDisp
 	                {
 	                	ntasktype = mapentry.getValue()[0];               
 	                }
-	                if (operation.equals("112016"))
+	                else if (operation.equals("112016"))
 	    			{
-	                	ntasktype = mapentry.getValue()[0];  
+	                	if(keyname.equals("vphoneno") && ntype.equals("4"))
+		                {
+	                		vphoneno = mapentry.getValue()[0];
+		                }
+		                else if(keyname.equals("ntype"))
+		                {
+		                	ntype = mapentry.getValue()[0];               
+		                }
 	    			}
 	            }
 	            if (operation.equals("112016"))
@@ -291,6 +303,25 @@ public class KLHadoopI extends _KLInterfaceDisp
 				}
 				catch (IOException e)
 				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			else if (operation.equals("122006"))	// 查询、分析结果保存
+			{
+				SmsSearchSave f = new SmsSearchSave();
+				try {
+					outdata = f.SmsSearchSafe(indata);
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
