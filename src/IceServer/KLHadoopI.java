@@ -15,10 +15,7 @@ package IceServer;
 import Ice.Current;
 import KLBD.*;
 import KLInterfaceModule.*;
-import KLInquire.Sms;
-import KLInquire.SmsInquire;
-import KLInquire.SmsSearch;
-import KLInquire.SmsSearchSave;
+import KLInquire.*;
 import StatisticRun.ReadTaskFile;
 
 import java.io.IOException;
@@ -309,19 +306,28 @@ public class KLHadoopI extends _KLInterfaceDisp
 			}
 			else if (operation.equals("122006"))	// 查询、分析结果保存
 			{
-				SmsSearchSave f = new SmsSearchSave();
-				try {
-					outdata = f.SmsSearchSafe(indata);
-				} catch (ClassNotFoundException e) {
+				SmsInquireSave f = new SmsInquireSave();
+				try
+				{
+					outdata = f.SmsSafe(indata);
+				}
+				catch (ClassNotFoundException e)
+				{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				} catch (IOException e) {
+				}
+				catch (IOException e)
+				{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				} catch (ParseException e) {
+				}
+				catch (ParseException e)
+				{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				} catch (SQLException e) {
+				}
+				catch (SQLException e)
+				{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
