@@ -250,7 +250,9 @@ public class KLHadoopI extends _KLInterfaceDisp
 					operation.equals("112014") ||	// 群发号码分析结果查询
 					operation.equals("112016") ||	// 通信频率分析结果查询
 					operation.equals("112017") ||	// 溯源分析结果查询
-					operation.equals("112018"))		// 亲密度分析结果查询
+					operation.equals("112018") ||	// 亲密度分析结果查询
+					operation.equals("112019") ||	// 转发分析结果查询
+					operation.equals("112022"))		// 每天短信流通量统计结果查询
 			{
 				String ntasktype = null;
 				String vtaskname = null;
