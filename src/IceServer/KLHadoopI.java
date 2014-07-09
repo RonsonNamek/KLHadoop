@@ -220,6 +220,7 @@ public class KLHadoopI extends _KLInterfaceDisp
 				}
 			}
 
+	        List<String> vsmsid_array = new LinkedList<String>();
 	        List<String> vsrcnum_array = new LinkedList<String>();
 	        List<String> vsrccity_array = new LinkedList<String>();
 	        List<String> vdesnum_array = new LinkedList<String>();
@@ -228,6 +229,7 @@ public class KLHadoopI extends _KLInterfaceDisp
 	        List<String> vsmscontent_array = new LinkedList<String>();
 	        for(int i=0; i < smslist.size(); i++)
 	        {
+	        	vsmsid_array.add(smslist.get(i).getSmsid());
 	            vsrcnum_array.add(smslist.get(i).getSendnum());
 	            vsrccity_array.add(smslist.get(i).getSendlocation());
 	            vdesnum_array.add(smslist.get(i).getReceivenum());
@@ -235,6 +237,7 @@ public class KLHadoopI extends _KLInterfaceDisp
 	            vsendtime_array.add(smslist.get(i).getSendtime());
 	            vsmscontent_array.add(smslist.get(i).getContent());
 	        }
+	        outdata.put("vsmsid",  vsmsid_array.toArray(new String[vsmsid_array.size()]));
 	        outdata.put("vsrcnum",  vsrcnum_array.toArray(new String[vsrcnum_array.size()]));
 	        outdata.put("vsrccityid",  vsrccity_array.toArray(new String[vsrccity_array.size()]));
 	        outdata.put("vdesnum",  vdesnum_array.toArray(new String[vdesnum_array.size()]));
