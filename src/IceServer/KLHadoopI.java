@@ -22,12 +22,9 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.logging.Level;
 
 import org.apache.log4j.Logger;
@@ -72,7 +69,7 @@ public class KLHadoopI extends _KLInterfaceDisp
 				if(klmt == null)
 				{
 					// TODO
-					stataus = -1;
+					stataus = -3;
 				}
 				klmt.ice_ping();
 		        logger.info("Task ping success.");
@@ -81,42 +78,17 @@ public class KLHadoopI extends _KLInterfaceDisp
 	        {
 	            ex.printStackTrace();
 	            System.err.println(ex);
-	            stataus = -1;
+	            stataus = -3;
 	        }
 			
 			
 			if(operation.equals("111007"))		//创建任务的解析
 			{
-	            String vparams = null;
-	            String voperatorid = null;
-	            long ntasktype = 0;
-	            String vtaskname = null;
+	            String vparams = indata.get("vparams")[0];
+	            String voperatorid = indata.get("voperatorid")[0];
+	            long ntasktype = Long.parseLong(indata.get("ntasktype")[0]);
+	            String vtaskname = indata.get("vtaskname")[0];
 
-	            //定义迭代器
-	            Set<Entry<String, String[]>> set = indata.entrySet();
-	    		Iterator<Entry<String, String[]>> iterator = set.iterator();
-	            while (iterator.hasNext())
-	            {
-
-	            	Entry<String, String[]> mapentry = iterator.next();
-	            	String keyname = mapentry.getKey();
-	                if(keyname.equals("vparams"))
-	                {
-	                	vparams = mapentry.getValue()[0];
-	                }
-	                else if(keyname.equals("voperatorid"))
-	                {
-	                	voperatorid = mapentry.getValue()[0];       
-	                }
-	                else if(keyname.equals("ntasktype"))
-	                {
-	                	ntasktype = Long.parseLong(mapentry.getValue()[0]);               
-	                }
-	                else if(keyname.equals("vtaskname"))
-	                {
-	                	vtaskname = mapentry.getValue()[0];               
-	                }
-	            }
 	            try
 	            {
 	            	stataus = klmt.AddTask(vparams, vtaskname, voperatorid, ntasktype);
@@ -129,28 +101,9 @@ public class KLHadoopI extends _KLInterfaceDisp
 		    }
 			else if (operation.equals("111008"))	//获取所有任务的列表的解析
 			{
-		        String vbegindate = null;
-		        String venddate = null;
-		        String voperatorid = null;
-		        Set<Entry<String, String[]>> set = indata.entrySet();
-	    		Iterator<Entry<String, String[]>> iterator = set.iterator();
-	            while (iterator.hasNext())
-	            {
-	            	Entry<String, String[]> mapentry = iterator.next();
-	            	String keyname = mapentry.getKey();
-	                if(keyname.equals("vbegindate"))
-	                {
-	                    vbegindate = mapentry.getValue()[0];
-	                }
-	                else if(keyname.equals("venddate"))
-	                {
-	                    venddate = mapentry.getValue()[0];               
-	                }
-	                else if(keyname.equals("voperatorid"))
-	                {
-	                	voperatorid = mapentry.getValue()[0];               
-	                }
-	            }
+		        String vbegindate = indata.get("vbegindate")[0];
+		        String venddate = indata.get("venddate")[0];
+		        String voperatorid = indata.get("voperatorid")[0];
 	            
 	            KLTaskArrHolder tasklist = new KLTaskArrHolder();
 	            try
@@ -163,7 +116,11 @@ public class KLHadoopI extends _KLInterfaceDisp
 	                System.err.println(ex);
 	            }
 	            
-	            int size = tasklist.value.length;
+	            int size = 0;
+	            if (tasklist.value != null)
+	            {
+	            	size = tasklist.value.length;
+	            }
 	            List<String> taskname_array = new LinkedList<String>();
 		        List<String> sysdate_array = new LinkedList<String>();
 		        List<String> type_array = new LinkedList<String>();
@@ -195,29 +152,22 @@ public class KLHadoopI extends _KLInterfaceDisp
 		{
 			// 查询短信接口
 			List<Sms> smslist = new LinkedList<Sms>();
-			if (operation.equals("120003"))	//组合条件查询接口的解析
+			try
 			{
-				SmsInquire test1 = new SmsInquire();
-				try
+				if (operation.equals("120003"))			//组合条件查询接口的解析
 				{
+					SmsInquire test1 = new SmsInquire();
 					smslist = test1.getSms(indata);
 				}
-				catch (Exception ex)
-				{
-					java.util.logging.Logger.getLogger(KLHadoopI.class.getName()).log(Level.SEVERE, null, ex);
+				else if (operation.equals("120009"))	//特征值查询接口的解析
+				{				
+					SmsSearch test1 = new SmsSearch();
+					smslist = test1.getSms(indata);
 				}
 			}
-			else if (operation.equals("120009"))	//特征值查询接口的解析
-			{				
-				SmsSearch test1 = new SmsSearch();
-				try
-				{
-					smslist = test1.getSms(indata);
-				}
-				catch (Exception ex)
-				{
-					java.util.logging.Logger.getLogger(KLHadoopI.class.getName()).log(Level.SEVERE, null, ex);
-				}
+			catch (Exception ex)
+			{
+				java.util.logging.Logger.getLogger(KLHadoopI.class.getName()).log(Level.SEVERE, null, ex);
 			}
 
 	        List<String> vsmsid_array = new LinkedList<String>();
@@ -257,39 +207,14 @@ public class KLHadoopI extends _KLInterfaceDisp
 					operation.equals("112019") ||	// 转发分析结果查询
 					operation.equals("112022"))		// 每天短信流通量统计结果查询
 			{
-				String ntasktype = null;
-				String vtaskname = null;
-				String vphoneno = null;
-				String ntype = null;
-		        Set<Entry<String, String[]>> set = indata.entrySet();
-	    		Iterator<Entry<String, String[]>> iterator = set.iterator();
-	            while (iterator.hasNext())
-	            {
-	            	Entry<String, String[]> mapentry = iterator.next();
-	            	String keyname = mapentry.getKey();
-	                if(keyname.equals("vtaskname"))
-	                {
-	                	vtaskname = mapentry.getValue()[0];
-	                }
-	                else if(keyname.equals("ntasktype"))
-	                {
-	                	ntasktype = mapentry.getValue()[0];               
-	                }
-	                else if (operation.equals("112016"))
-	    			{
-	                	if(keyname.equals("vphoneno") && ntype.equals("4"))
-		                {
-	                		vphoneno = mapentry.getValue()[0];
-		                }
-		                else if(keyname.equals("ntype"))
-		                {
-		                	ntype = mapentry.getValue()[0];               
-		                }
-	    			}
-	            }
+				String ntasktype = indata.get("ntasktype")[0];
+				String vtaskname = indata.get("vtaskname")[0];
+				String[] vphoneno = indata.get("vphoneno");
+				String[] ntype = indata.get("ntype");
+
 	            if (operation.equals("112016"))
 				{
-					outdata = StatisticRead.readCommFrenFile(ntasktype, ntype, vphoneno, vtaskname);
+					outdata = StatisticRead.readCommFrenFile(ntasktype, ntype[0], vphoneno[0], vtaskname);
 				}
 	            else
 	            {
@@ -311,10 +236,19 @@ public class KLHadoopI extends _KLInterfaceDisp
 			}
 			else if (operation.equals("122006"))	// 查询、分析结果保存
 			{
-				SmsInquireSave f = new SmsInquireSave();
+				long ntype = Long.parseLong(indata.get("ntype")[0]);
 				try
 				{
-					outdata = f.SmsSafe(indata);
+					if (ntype == 0)			// 特征查询的结果保存
+					{
+						SmsSearchSave f = new SmsSearchSave();
+						outdata = f.SmsSearchSafe(indata);
+					}
+					else if (ntype == 1)	// 组合条件查询的结果保存
+					{
+						SmsInquireSave f = new SmsInquireSave();
+						outdata = f.SmsSafe(indata);
+					}
 				}
 				catch (ClassNotFoundException e)
 				{
