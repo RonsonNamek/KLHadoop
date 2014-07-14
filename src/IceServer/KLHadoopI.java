@@ -214,7 +214,12 @@ public class KLHadoopI extends _KLInterfaceDisp
 
 	            if (operation.equals("112016"))
 				{
-					outdata = StatisticRead.readCommFrenFile(ntasktype, ntype[0], vphoneno[0], vtaskname);
+	            	String phoneno = null;
+	            	if (vphoneno.length != 0)
+	            	{
+	            		phoneno = vphoneno[0];
+	            	}
+					outdata = StatisticRead.readCommFrenFile(ntasktype, ntype[0], phoneno, vtaskname);
 				}
 	            else
 	            {
