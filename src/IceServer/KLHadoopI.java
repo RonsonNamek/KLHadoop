@@ -30,6 +30,7 @@ import java.util.logging.Level;
 import org.apache.log4j.Logger;
 
 import com.kunlun.bd.read.StatisticRead;
+import com.kunlun.bd.util.WriteToOracle;
 
 
 
@@ -275,6 +276,19 @@ public class KLHadoopI extends _KLInterfaceDisp
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+			}
+			else if (operation.equals("112028"))	// 长文本相似分析结果保存
+			{
+				String tasktype = indata.get("ntasktype")[0];
+				String taskname = indata.get("vtaskname")[0];
+				String ruleId = indata.get("vruleid")[0];
+				String operatorId = indata.get("voperatorid")[0];
+				String dataname = indata.get("vdataname")[0];
+				String[] rtablename = new String[1];
+				
+				rtablename[0] = WriteToOracle.writeSmsToOrc(ruleId, operatorId, dataname, tasktype, taskname);
+				
+				outdata.put("rtablename", rtablename);
 			}
 		}
 
