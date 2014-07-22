@@ -27,7 +27,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.kunlun.bd.read.StatisticRead;
 import com.kunlun.bd.util.WriteToOracle;
@@ -40,7 +41,7 @@ public class KLHadoopI extends _KLInterfaceDisp
 {
 
 	private static final long serialVersionUID = 1L;
-	private static Logger logger = Logger.getLogger(KLHadoopI.class);
+	private static Logger logger = LogManager.getLogger(KLHadoopI.class);
 
 	
 	public KLHadoopI(String name)
@@ -206,7 +207,8 @@ public class KLHadoopI extends _KLInterfaceDisp
 					operation.equals("112017") ||	// 溯源分析结果查询
 					operation.equals("112018") ||	// 亲密度分析结果查询
 					operation.equals("112019") ||	// 转发分析结果查询
-					operation.equals("112022"))		// 每天短信流通量统计结果查询
+					operation.equals("112022") ||	// 每天短信流通量统计结果查询
+					operation.equals("112033"))		// 通联分析结果查询
 			{
 				String ntasktype = indata.get("ntasktype")[0];
 				String vtaskname = indata.get("vtaskname")[0];
