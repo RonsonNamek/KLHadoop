@@ -207,8 +207,7 @@ public class KLHadoopI extends _KLInterfaceDisp
 					operation.equals("112017") ||	// 溯源分析结果查询
 					operation.equals("112018") ||	// 亲密度分析结果查询
 					operation.equals("112019") ||	// 转发分析结果查询
-					operation.equals("112022") ||	// 每天短信流通量统计结果查询
-					operation.equals("112033"))		// 通联分析结果查询
+					operation.equals("112022")) 	// 每天短信流通量统计结果查询
 			{
 				String ntasktype = indata.get("ntasktype")[0];
 				String vtaskname = indata.get("vtaskname")[0];
@@ -291,6 +290,18 @@ public class KLHadoopI extends _KLInterfaceDisp
 				rtablename[0] = WriteToOracle.writeSmsToOrc(ruleId, operatorId, dataname, tasktype, taskname);
 				
 				outdata.put("rtablename", rtablename);
+			}
+			else if (operation.equals("112033"))	// 通联分析结果查询
+			{
+				String phoneno = indata.get("vphoneno")[0];
+				int layer = (int) Long.parseLong(indata.get("nlayer")[0]);
+				String begindate = indata.get("vbegindate")[0];
+				String enddate = indata.get("venddate")[0];
+				String[] xmlstring = new String[1];
+				
+				xmlstring[0] = StatisticRead.tongLian(phoneno, layer, begindate, enddate);
+				
+				outdata.put("vxmlstring", xmlstring);
 			}
 		}
 
